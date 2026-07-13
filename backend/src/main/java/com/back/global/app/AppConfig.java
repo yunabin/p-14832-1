@@ -2,8 +2,8 @@ package com.back.global.app;
 
 import com.back.standard.util.Ut;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -12,13 +12,35 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class AppConfig {
+
     private static Environment environment;
 
-    private static ObjectMapper objectMapper;
+    @Getter
+    private static String cookieDomain;
+    @Getter
+    private static String siteFrontUrl;
+    @Getter
+    private static String siteBackUrl;
 
-    @Autowired
-    public void setEnvironment(Environment environment) {
+    public AppConfig(
+            Environment environment,
+            ObjectMapper objectMapper,
+
+            @Value("${custom.site.cookieDomain}") String cookieDomain,
+            @Value("${custom.site.frontUrl}") String siteFrontUrl,
+            @Value("${custom.site.backUrl}") String siteBackUrl
+    ) {
         AppConfig.environment = environment;
+        Ut.json.objectMapper = objectMapper;
+
+        AppConfig.cookieDomain = cookieDomain;
+        AppConfig.siteFrontUrl = siteFrontUrl;
+        AppConfig.siteBackUrl = siteBackUrl;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     public static boolean isDev() {
@@ -26,9 +48,8 @@ public class AppConfig {
     }
 
     public static boolean isTest() {
-        return environment.matchesProfiles("test");
+        return !environment.matchesProfiles("test");
     }
-
 
     public static boolean isProd() {
         return environment.matchesProfiles("prod");
@@ -36,20 +57,5 @@ public class AppConfig {
 
     public static boolean isNotProd() {
         return !isProd();
-    }
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Autowired
-    public void setObjectMapper(ObjectMapper objectMapper) {
-        AppConfig.objectMapper = objectMapper;
-    }
-
-    @PostConstruct // 빈(Bean)이 생성되고 의존성 주입이 끝난 직후에 딱 한 번 호출되는 초기화 훅(hook)
-    public void postConstruct() {
-        Ut.json.objectMapper = objectMapper;
     }
 }

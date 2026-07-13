@@ -91,14 +91,14 @@ custom:
     frontUrl: "http://${custom.dev.cookieDomain}:3000"
     backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
   prod:
-    cookieDomain: p-14566-1.sik2.site
+    cookieDomain: p-14832-1.sik2.site
     frontUrl: "https://www.${custom.prod.cookieDomain}"
     backUrl: "https://api.${custom.prod.cookieDomain}"
   site:
     cookieDomain: "${custom.dev.cookieDomain}"
     frontUrl: "${custom.dev.frontUrl}"
     backUrl: "${custom.dev.backUrl}"
-    name: p-14566-1
+    name: p-14832-1
   jwt:
     secretKey: ${CUSTOM__JWT__SECRET_KEY}
   accessToken:

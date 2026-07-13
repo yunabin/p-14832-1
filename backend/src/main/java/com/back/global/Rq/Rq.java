@@ -2,6 +2,7 @@ package com.back.global.Rq;
 
 import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
+import com.back.global.app.AppConfig;
 import com.back.global.security.SecurityUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,9 +48,9 @@ public class Rq {
 
     public String getHeader(String name, String defaultValue) {
         return Optional
-                        .ofNullable(req.getHeader("Authorization"))
-                        .filter(headerValue -> !headerValue.isBlank())
-                        .orElse(defaultValue);
+                .ofNullable(req.getHeader("Authorization"))
+                .filter(headerValue -> !headerValue.isBlank())
+                .orElse(defaultValue);
     }
 
     public String getCookieValue(String name, String defaultValue) {
@@ -71,7 +72,7 @@ public class Rq {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/"); // 쿠키를 도메인 전체에서 쓰겠다.
         cookie.setHttpOnly(true); // 쿠키를 스크립트로 접근 못하게(XSS 공격방어)
-        cookie.setDomain("localhost"); // 쿠키가 적용될 도메인 지정
+        cookie.setDomain(AppConfig.getCookieDomain()); // 쿠키가 적용될 도메인 지정
         cookie.setSecure(true); // https 에서만 쿠키전송
         cookie.setAttribute("SameSite", "Strict"); // 동일 사이트에서만 쿠키 전송(CSRF 공격방어)
 
