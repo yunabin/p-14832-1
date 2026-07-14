@@ -4,9 +4,9 @@ name: deploy
 # 전역 환경변수
 # =========================
 env:
-  IMAGE_REPOSITORY: p-14566-1-2026-07-07 # GHCR 이미지 리포지토리명(소유자 포함 X)
-  CONTAINER_1_NAME: p-14566-1_1 # 슬롯1(고정 이름)
-  CONTAINER_2_NAME: p-14566-1_2 # 슬롯2(고정 이름)
+  IMAGE_REPOSITORY: p-14832-1 # GHCR 이미지 리포지토리명(소유자 포함 X)
+  CONTAINER_1_NAME: p-14832-1_1 # 슬롯1(고정 이름)
+  CONTAINER_2_NAME: p-14832-1_2 # 슬롯2(고정 이름)
   CONTAINER_PORT: 8080 # 컨테이너 내부 포트(스프링부트)
   EC2_INSTANCE_TAG_NAME: terra-ec2-1 # 배포 대상 EC2 Name 태그
   DOCKER_NETWORK: common # 도커 네트워크
@@ -179,7 +179,7 @@ jobs:
             PORT_IN="${{ env.CONTAINER_PORT }}"
             NET="${{ env.DOCKER_NETWORK }}"
 
-            echo "🔹 Use image: ${IMAGE}"
+            echo "? Use image: ${IMAGE}"
             docker pull "${IMAGE}"
 
             # ---------------------------------------------------------
@@ -206,7 +206,7 @@ jobs:
               -H "Authorization: Bearer ${TOKEN}" \
               | jq -r '.forward_host')
 
-            echo "🔎 CURRENT_HOST: ${CURRENT_HOST:-none}"
+            echo "? CURRENT_HOST: ${CURRENT_HOST:-none}"
 
             # ---------------------------------------------------------
             # 3) 역할(blue/green) 판정
@@ -223,14 +223,14 @@ jobs:
               BLUE="none"   # 초기 배포
               GREEN="${SLOT1}"
             fi
-            echo "🎨 role -> blue(now): ${BLUE}, green(next): ${GREEN}"
+            echo "? role -> blue(now): ${BLUE}, green(next): ${GREEN}"
 
             # ---------------------------------------------------------
             # 4) green 역할 컨테이너 재기동
             #    - 같은 네트워크 상에서 NPM이 컨테이너명:PORT로 프록시하므로 -p 불필요
             # ---------------------------------------------------------
             docker rm -f "${GREEN}" >/dev/null 2>&1 || true
-            echo "🚀 run new container → ${GREEN}"
+            echo "? run new container → ${GREEN}"
             docker run -d --name "${GREEN}" \
               --restart unless-stopped \
               --network "${NET}" \
@@ -262,7 +262,7 @@ jobs:
               -H "Authorization: Bearer ${TOKEN}" \
               -H "Content-Type: application/json" \
               -d "${NEW_CFG}" >/dev/null
-            echo "🔁 switch upstream → ${GREEN}:${PORT_IN}"
+            echo "? switch upstream → ${GREEN}:${PORT_IN}"
 
             # ---------------------------------------------------------
             # 7) 이전 blue 종료(최초 배포면 생략)
@@ -270,7 +270,7 @@ jobs:
             if [[ "${BLUE}" != "none" ]]; then
               docker stop "${BLUE}" >/dev/null 2>&1 || true
               docker rm "${BLUE}" >/dev/null 2>&1 || true
-              echo "🧹 removed old blue: ${BLUE}"
+              echo "? removed old blue: ${BLUE}"
             fi
 
             # ---------------------------------------------------------
@@ -285,4 +285,4 @@ jobs:
                 | xargs -r docker rmi
             } || true
 
-            echo "🏁 Blue/Green switch complete. now blue = ${GREEN}"
+            echo "? Blue/Green switch complete. now blue = ${GREEN}"
